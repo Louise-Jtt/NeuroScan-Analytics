@@ -14,17 +14,33 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql
 
-  app:
-    build: .
-    container_name: spring_boot_app
+  backend:
+    build: ./backend
+    container_name: backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:sqlserver://db:1433;databaseName=MedicalDB
       SPRING_DATASOURCE_USERNAME: sa
       SPRING_DATASOURCE_PASSWORD: YourStrong!Passw0rd
     ports:
       - "8080:8080"
+    volumes:
+      - ./backend/src:/app/src
     depends_on:
       - db
+    networks:
+      - medical_network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    environment:
+      - API_URL=http://backend:8080/api
+    volumes:
+      - ./frontend:/app/frontend
     networks:
       - medical_network
 
